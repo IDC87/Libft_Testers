@@ -1,0 +1,284 @@
+ft_memset:     [OK] [OK] [OK] [OK] [OK] [FAILED] [OK] 
+[fail]: basic memset test (fill a buffer with 'A')
+Test code:
+	char *b1 = (char*)malloc(sizeof(char) * (0xF0000 + 1));
+	char *b2 = (char*)malloc(sizeof(char) * (0xF0000 + 1));
+
+	*b1 = 0;
+	*b2 = 0;
+	__builtin___memset_chk (b1, '\5', 0xF0000, __builtin_object_size (b1, 0));
+	ft_memset(b2, '\5', 0xF0000);
+	if (!memcmp(b1, b2, 0xF0000))
+	{
+		free(b1);
+		free(b2);
+		exit(TEST_SUCCESS);
+	}
+	free(b1);
+	free(b2);
+	exit(TEST_FAILED);
+
+Diffs:
+      memset: ||
+   ft_memset: ||
+
+ft_bzero:      [FAILED] [OK] [OK] [CRASH] 
+[fail]: bzero with normal params fail !
+Test code:
+	char str[0xF00];
+	char str2[0xF00];
+
+	__builtin___memset_chk (str, 'a', 0xF00, __builtin_object_size (str, 0));
+	__builtin___memset_chk (str2, 'a', 0xF00, __builtin_object_size (str2, 0));
+	__builtin___memset_chk (str, 0, 20, __builtin_object_size (str, 0));
+	ft_bzero(str2, 20);
+	if (!memcmp(str, str2, 0xF00))
+		exit(TEST_SUCCESS);
+	for (register int __i = 0; __i < 22; ++__i)
+	for (register int __i = 0; __i < 22; ++__i)
+	exit(TEST_FAILED);
+
+Diffs:
+       bzero: |\x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x61 \x61 |
+    ft_bzero: |\x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x30 \x61 \x61 ||
+   ft_memset: ||
+
+[crash]: your bzero crash because it read too many bytes !
+Test code:
+	const size_t size = 10;
+	char *buff = electric_alloc(size);
+
+	__builtin___memset_chk (buff, '\x1', size, __builtin_object_size (buff, 0));
+	ft_bzero(buff, size);
+	exit(TEST_SUCCESS);
+
+
+ft_memcpy:     [OK] [OK] [OK] [OK] [OK] [OK] [OK] [NO CRASH] [OK] [OK] [OK] 
+[no crash]: your memcpy does not segv with NULL on first params
+Test code:
+	ft_memcpy(((void *)0), "segfaulter tu dois", 17);
+
+
+ft_memccpy:    [MISSING]
+ft_memmove:    [OK] [OK] [OK] [OK] [OK] [OK] [OK] [CRASH] [OK] [OK] [OK] [OK] [CRASH] [OK] 
+[crash]: your memmove does not work with a 128Mo data input !
+Test code:
+	int size = 128 * 1024 * 1024;
+	char *dst = (char *)malloc(sizeof(char) * size);
+	char *data = (char *)malloc(sizeof(char) * size);
+
+	__builtin___memset_chk (data, 'A', size, __builtin_object_size (data, 0));
+	if (!dst)
+		exit(TEST_INVISIBLE);
+	ft_memmove(dst, data, size);
+	exit(TEST_SUCCESS);
+
+
+[crash]: your memmove does not well with NULL as both parameters and size
+Test code:
+	ft_memmove(((void *)0), ((void *)0), 5);
+
+
+ft_memchr:     [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_memcmp:     [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_strlen:     [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_isalpha:    [OK] 
+ft_isdigit:    [OK] 
+ft_isalnum:    [OK] 
+ft_isascii:    [OK] 
+ft_isprint:    [OK] 
+ft_toupper:    [OK] 
+ft_tolower:    [OK] 
+ft_strchr:     [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_strrchr:    [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_strncmp:    [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_strlcpy:    [OK] [OK] [FAILED] [FAILED] [FAILED] [FAILED] [OK] 
+[fail]: your strlcpy overflow the dest
+Test code:
+	char *str = "BBBB";
+	char buff1[0xF00];
+	char buff2[0xF00];
+
+	__builtin___memset_chk (buff1, 'A', 20, __builtin_object_size (buff1, 0));
+	__builtin___memset_chk (buff2, 'A', 20, __builtin_object_size (buff2, 0));
+	__builtin___strlcpy_chk (buff1, str, sizeof(buff1), __builtin_object_size (buff1, 2 > 1 ? 1 : 0));
+	ft_strlcpy(buff2, str, sizeof(buff2));
+	if (!memcmp(buff1, buff2, 20))
+		exit(TEST_SUCCESS);
+	for (register int __i = 0; __i < 20; ++__i)
+	for (register int __i = 0; __i < 20; ++__i)
+	exit(TEST_FAILED);
+
+Diffs:
+     strlcpy: |\x42 \x42 \x42 \x42 \x0  \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 |
+  ft_strlcpy: |\x42 \x42 \x42 \x42 \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  |x30 \x30 \x61 \x61 ||
+   ft_memset: ||
+
+[fail]: your strlcpy does works whe size < strlen(src)
+Test code:
+	char *str = "hello !";
+	char buff1[0xF00];
+	char buff2[0xF00];
+	size_t r1;
+	size_t r2;
+
+	__builtin___memset_chk (buff1, 'A', 20, __builtin_object_size (buff1, 0));
+	__builtin___memset_chk (buff2, 'A', 20, __builtin_object_size (buff2, 0));
+	r1 = __builtin___strlcpy_chk (buff1, str, 2, __builtin_object_size (buff1, 2 > 1 ? 1 : 0));
+	r2 = ft_strlcpy(buff2, str, 2);
+	if (r1 == r2 && !memcmp(buff1, buff2, 20))
+		exit(TEST_SUCCESS);
+	if (r1 != r2)
+	{
+	}
+		for (register int __i = 0; __i < 20; ++__i)
+		for (register int __i = 0; __i < 20; ++__i)
+	}
+	exit(TEST_FAILED);
+
+Diffs:
+     strlcpy: |7|
+  ft_strlcpy: |21|
+
+[fail]: your strlcpy does not works with 0-length string
+Test code:
+	char *str = "";
+	char buff1[0xF00];
+	char buff2[0xF00];
+	size_t r1;
+	size_t r2;
+
+	__builtin___memset_chk (buff1, 'A', 20, __builtin_object_size (buff1, 0));
+	__builtin___memset_chk (buff2, 'A', 20, __builtin_object_size (buff2, 0));
+	r1 = __builtin___strlcpy_chk (buff1, str, sizeof(buff1), __builtin_object_size (buff1, 2 > 1 ? 1 : 0));
+	r2 = ft_strlcpy(buff2, str, sizeof(buff2));
+	if (r1 == r2 && !memcmp(buff1, buff2, 20))
+		exit(TEST_SUCCESS);
+	if (r1 != r2)
+	{
+	}
+		for (register int __i = 0; __i < 20; ++__i)
+		for (register int __i = 0; __i < 20; ++__i)
+	}
+	exit(TEST_FAILED);
+
+Diffs:
+     strlcpy: |\x0  \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 \x41 |
+  ft_strlcpy: |\x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  \x0  |x30 \x30 \x61 \x61 ||
+   ft_memset: ||
+
+[fail]: your strlcpy copies while destsize is zero, or does not return the size of the string it tried to create
+Test code:
+	char *str = "BBBB";
+	char buff1[0xF00];
+	char buff2[0xF00];
+
+	__builtin___memset_chk (buff1, 'A', 20, __builtin_object_size (buff1, 0));
+	__builtin___memset_chk (buff2, 'A', 20, __builtin_object_size (buff2, 0));
+	if (__builtin___strlcpy_chk (buff1, str, 0, __builtin_object_size (buff1, 2 > 1 ? 1 : 0)) != ft_strlcpy(buff2, str, 0))
+		exit(TEST_FAILED);
+	if (!memcmp(buff1, buff2, 20))
+		exit(TEST_SUCCESS);
+	for (register int __i = 0; __i < 20; ++__i)
+	for (register int __i = 0; __i < 20; ++__i)
+	exit(TEST_FAILED);
+
+Diffs:
+
+
+ft_strlcat:    [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+ft_strnstr:    [OK] [OK] [FAILED] [FAILED] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] 
+[fail]: your strnstr does not work with basic input
+Test code:
+	char *s1 = "MZIRIBMZIRIBMZE123";
+	char *s2 = "MZIRIBMZE";
+	size_t max = strlen(s2);
+	char *i1 = strnstr(s1, s2, max);
+	char *i2 = ft_strnstr(s1, s2, max);
+
+	if (i1 == i2)
+		exit(TEST_SUCCESS);
+	exit(TEST_FAILED);
+
+Diffs:
+     strnstr: |(null)|
+  ft_strnstr: |MZIRIBMZIRIBMZE123|
+
+[fail]: your strnstr does not work with basic input
+Test code:
+	char *big = "abcdef";
+	char *little = "abcdefghijklmnop";
+	size_t max = strlen(big);
+	char *s1 = strnstr(big, little, max);
+	char *s2 = ft_strnstr(big, little, max);
+
+	if (s1 == s2)
+		exit(TEST_SUCCESS);
+	exit(TEST_FAILED);
+
+Diffs:
+     strnstr: |(null)|
+  ft_strnstr: |abcdef|
+
+ft_atoi:       [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [KO] [KO] [OK] [OK] [OK] [OK] 
+[KO]: your atoi does not work with over long max value
+Test code:
+	char n[40] = "99999999999999999999999999";
+	int i1 = atoi(n);
+	int i2 = ft_atoi(n);
+
+	if (i1 == i2)
+		exit(TEST_SUCCESS);
+	exit(TEST_KO);
+
+Diffs:
+        atoi: |-1|
+     ft_atoi: |-469762049|
+
+[KO]: your atoi does not work with over long min value
+Test code:
+	char n[40] = "-99999999999999999999999999";
+	int i1 = atoi(n);
+	int i2 = ft_atoi(n);
+
+	if (i1 == i2)
+		exit(TEST_SUCCESS);
+	exit(TEST_KO);
+
+Diffs:
+        atoi: |0|
+     ft_atoi: |469762049|
+
+ft_calloc:     [OK] [OK] [OK] [FAILED] [OK] 
+[fail]: your calloc don't work with 0 size
+Test code:
+	void *str = ft_calloc(0, 0);
+
+	if (str == ((void *)0))
+		exit(TEST_FAILED);
+	free(str);
+	exit(TEST_SUCCESS);
+
+Diffs:
+
+
+ft_strdup:     [MISSING]
+ft_substr:     [MISSING]
+ft_strjoin:    [MISSING]
+ft_strtrim:    [MISSING]
+ft_split:      [MISSING]
+ft_itoa:       [MISSING]
+ft_strmapi:    [MISSING]
+ft_putchar_fd: [MISSING]
+ft_putstr_fd:  [MISSING]
+ft_putendl_fd: [MISSING]
+ft_putnbr_fd:  [MISSING]
+ft_lstnew:     [MISSING]
+ft_lstadd_front: [MISSING]
+ft_lstsize:    [MISSING]
+ft_lstlast:    [MISSING]
+ft_lstadd_back:[MISSING]
+ft_lstdelone:  [MISSING]
+ft_lstclear:   [MISSING]
+ft_lstiter:    [MISSING]
+ft_lstmap:     [MISSING]
